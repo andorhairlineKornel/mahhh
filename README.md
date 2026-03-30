@@ -15,11 +15,16 @@ All registry values changed by the tool are backed up to `gameboost-backup.json`
 
 ## Usage
 
-### Option A (easy)
-1. Right-click `Run-GameBoost-Admin.bat`
-2. Click **Run as administrator**
+### Option A (recommended, easiest)
+1. Double-click `Run-GameBoost-Admin.bat`
+2. Pick one menu option:
+   - `1` apply safe tweaks
+   - `2` apply safe tweaks + HAGS
+   - `3` revert from backup
 
-### Option B (PowerShell)
+> You do **not** need to open `GameBoost.ps1` separately when using the `.bat` launcher.
+
+### Option B (PowerShell, advanced)
 Run in elevated PowerShell:
 
 ```powershell
