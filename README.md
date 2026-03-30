@@ -48,3 +48,11 @@ Revert registry settings from backup:
 - This script intentionally avoids risky changes (no overclocking, no undervolting, no disabling critical protections).
 - A reboot is recommended after applying changes.
 - If you want to switch power plans later, run `powercfg /L` and then `powercfg /S <GUID>`.
+
+
+## How to verify it worked
+
+- The launcher now keeps the elevated PowerShell window open so you can read the final status and validation summary.
+- Look for `Done. Applied safe gaming tweaks...` and `Validation summary:` in that window.
+- A run log is written to `gameboost-last-run.log` in the same folder as the script.
+- A backup file is written to `gameboost-backup.json` for revert operations.

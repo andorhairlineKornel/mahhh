@@ -46,6 +46,34 @@ function Set-RegistryValueSafe {
     New-ItemProperty -Path $Path -Name $Name -Value $Value -PropertyType $Type -Force | Out-Null
 }
 
+
+function Get-RegistryValueSafe {
+    param(
+        [Parameter(Mandatory = $true)] [string]$Path,
+        [Parameter(Mandatory = $true)] [string]$Name
+    )
+
+    try {
+        return Get-ItemPropertyValue -Path $Path -Name $Name -ErrorAction Stop
+    }
+    catch {
+        return '<not set>'
+    }
+}
+
+function Show-ValidationSummary {
+    Write-Host '' -NoNewline
+    Write-Host 'Validation summary:' -ForegroundColor Cyan
+
+    $activePlan = (powercfg /GETACTIVESCHEME 2>&1 | Out-String).Trim()
+    Write-Host "- Active power plan: $activePlan"
+    Write-Host "- AllowAutoGameMode: $(Get-RegistryValueSafe -Path 'HKCU:\Software\Microsoft\GameBar' -Name 'AllowAutoGameMode')"
+    Write-Host "- AutoGameModeEnabled: $(Get-RegistryValueSafe -Path 'HKCU:\Software\Microsoft\GameBar' -Name 'AutoGameModeEnabled')"
+    Write-Host "- VisualFXSetting: $(Get-RegistryValueSafe -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects' -Name 'VisualFXSetting')"
+    Write-Host "- GameDVR_Enabled: $(Get-RegistryValueSafe -Path 'HKCU:\System\GameConfigStore' -Name 'GameDVR_Enabled')"
+    Write-Host "- AppCaptureEnabled: $(Get-RegistryValueSafe -Path 'HKCU:\Software\Microsoft\Windows\CurrentVersion\GameDVR' -Name 'AppCaptureEnabled')"
+}
+
 function Save-Backup {
     param(
         [Parameter(Mandatory = $true)] [array]$Backup,
@@ -140,13 +168,26 @@ function Apply-Tweaks {
     Write-Host "Done. Applied safe gaming tweaks and selected power plan: $selectedPlan" -ForegroundColor Green
     Write-Host "Backup saved to: $backupFile"
     Write-Host 'Restart Windows to ensure all changes are active.' -ForegroundColor Yellow
+    Show-ValidationSummary
 }
 
+$logFile = Join-Path -Path $PSScriptRoot -ChildPath 'gameboost-last-run.log'
+$transcriptStarted = $false
+
 try {
+    try {
+        Start-Transcript -Path $logFile -Force | Out-Null
+        $transcriptStarted = $true
+    }
+    catch {
+        Write-Warning "Could not start transcript log at $logFile"
+    }
+
     if ($Revert) {
         Assert-Administrator
         Restore-Backup -FilePath (Join-Path -Path $PSScriptRoot -ChildPath 'gameboost-backup.json')
         Write-Host 'You may need to manually switch power plan back if desired (powercfg /L, then powercfg /S <GUID>).' -ForegroundColor Yellow
+        Show-ValidationSummary
     }
     else {
         Apply-Tweaks -EnableHags:$EnableHags
@@ -155,4 +196,10 @@ try {
 catch {
     Write-Error $_
     exit 1
+}
+finally {
+    if ($transcriptStarted) {
+        Stop-Transcript | Out-Null
+        Write-Host "Run log saved to: $logFile" -ForegroundColor DarkCyan
+    }
 }

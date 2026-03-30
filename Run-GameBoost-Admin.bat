@@ -18,6 +18,8 @@ echo 2^) Apply tweaks + enable HAGS
 echo 3^) Revert settings from backup
 echo 4^) Exit
 echo.
+echo Note: the elevated PowerShell window stays open so you can read results.
+echo.
 
 set /p CHOICE=Select an option [1-4]:
 
@@ -31,15 +33,15 @@ pause
 exit /b 1
 
 :apply
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"%PS_FILE%\"'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoExit -NoProfile -ExecutionPolicy Bypass -File \"%PS_FILE%\"'"
 goto done
 
 :apply_hags
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"%PS_FILE%\" -EnableHags'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoExit -NoProfile -ExecutionPolicy Bypass -File \"%PS_FILE%\" -EnableHags'"
 goto done
 
 :revert
-powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoProfile -ExecutionPolicy Bypass -File \"%PS_FILE%\" -Revert'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Start-Process PowerShell -Verb RunAs -ArgumentList '-NoExit -NoProfile -ExecutionPolicy Bypass -File \"%PS_FILE%\" -Revert'"
 goto done
 
 :done
